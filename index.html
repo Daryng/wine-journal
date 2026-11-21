@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daryn's Wine Journal</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #1a1008;
+    color: #f0e8d8;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #6b1a1a, #3d0f0f);
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid #4a2020;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #f5deb3;
+  }
+  header p {
+    font-size: 13px;
+    color: #c8a882;
+    margin-top: 4px;
+  }
+  .profile-bar {
+    background: #2a1510;
+    padding: 12px 20px;
+    font-size: 12px;
+    color: #c8a882;
+    border-bottom: 1px solid #3d2010;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .profile-bar span { display: flex; align-items: center; gap: 4px; }
+  .filters {
+    padding: 16px 20px 8px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    background: #2a1510;
+    border: 1px solid #4a2020;
+    color: #c8a882;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    background: #6b1a1a;
+    border-color: #8b2a2a;
+    color: #f5deb3;
+  }
+  .sort-row {
+    padding: 0 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #c8a882;
+  }
+  .sort-row select {
+    background: #2a1510;
+    border: 1px solid #4a2020;
+    color: #c8a882;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .stats {
+    padding: 0 20px 16px;
+    display: flex;
+    gap: 12px;
+  }
+  .stat-card {
+    background: #2a1510;
+    border: 1px solid #3d2010;
+    border-radius: 10px;
+    padding: 10px 14px;
+    flex: 1;
+    text-align: center;
+  }
+  .stat-card .num { font-size: 22px; font-weight: 700; color: #f5deb3; }
+  .stat-card .lbl { font-size: 10px; color: #c8a882; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .wine-list { padding: 0 20px 100px; }
+  .wine-card {
+    background: #231208;
+    border: 1px solid #3d2010;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+  .wine-card:hover { border-color: #6b1a1a; }
+  .wine-card.hidden { display: none; }
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .wine-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #f5deb3;
+    line-height: 1.3;
+    flex: 1;
+  }
+  .rating {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 44px;
+  }
+  .rating .score {
+    font-size: 20px;
+    font-weight: 700;
+    color: #e8a020;
+    line-height: 1;
+  }
+  .rating .stars {
+    font-size: 10px;
+    color: #e8a020;
+    letter-spacing: -1px;
+  }
+  .rating .label { font-size: 9px; color: #c8a882; }
+  .meta {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    background: #3d1a08;
+    border: 1px solid #5a2a10;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #c8a882;
+  }
+  .tag.grape { background: #1a1a3d; border-color: #2a2a5a; color: #a8a8d8; }
+  .tag.world { background: #1a3d1a; border-color: #2a5a2a; color: #a8d8a8; }
+  .occasion {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #a07850;
+    font-style: italic;
+  }
+  .notes {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #b89870;
+    line-height: 1.5;
+  }
+  details { margin-top: 8px; }
+  details summary {
+    font-size: 11px;
+    color: #8a6840;
+    cursor: pointer;
+    user-select: none;
+  }
+  details summary:hover { color: #c8a882; }
+  .education {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #8a7860;
+    line-height: 1.6;
+    background: #1a1008;
+    border-left: 2px solid #4a2010;
+    padding: 8px 10px;
+    border-radius: 0 6px 6px 0;
+  }
+  .date-logged {
+    margin-top: 8px;
+    font-size: 10px;
+    color: #6a5840;
+    text-align: right;
+  }
+  .empty {
+    text-align: center;
+    color: #6a5840;
+    padding: 40px 20px;
+    font-size: 14px;
+  }
+  .top-pick { border-color: #8b6a00; }
+  .top-pick .wine-name::after {
+    content: ' ★';
+    color: #e8a020;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍷 Daryn's Wine Journal</h1>
+  <p id="subtitle">Loading...</p>
+</header>
+
+<div class="profile-bar">
+  <span>🎯 Light–medium body</span>
+  <span>✨ Smooth, low tannin</span>
+  <span>❤️ Pinot Noir</span>
+  <span>💰 SGD 150 ceiling</span>
+</div>
+
+<div class="stats">
+  <div class="stat-card">
+    <div class="num" id="stat-total">0</div>
+    <div class="lbl">Wines</div>
+  </div>
+  <div class="stat-card">
+    <div class="num" id="stat-avg">0</div>
+    <div class="lbl">Avg Rating</div>
+  </div>
+  <div class="stat-card">
+    <div class="num" id="stat-top">0</div>
+    <div class="lbl">Top Picks (9+)</div>
+  </div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="Pinot Noir">Pinot Noir</button>
+  <button class="filter-btn" data-filter="Old World">Old World</button>
+  <button class="filter-btn" data-filter="New World">New World</button>
+  <button class="filter-btn" data-filter="top">Top Picks (8+)</button>
+</div>
+
+<div class="sort-row">
+  Sort by:
+  <select id="sortSelect">
+    <option value="date_desc">Date (newest)</option>
+    <option value="rating_desc">Rating (highest)</option>
+    <option value="rating_asc">Rating (lowest)</option>
+    <option value="name_asc">Name (A-Z)</option>
+  </select>
+</div>
+
+<div class="wine-list" id="wineList"></div>
+
+<script>
+const wines = [
+  {
+    "name": "Famille Perrachon Bourgogne Pinot Noir Vieilles Vignes",
+    "vintage": null,
+    "type": "Red",
+    "grape": "Pinot Noir",
+    "region": "Bourgogne, Burgundy, France",
+    "world": "Old World",
+    "producer": "Famille Perrachon",
+    "rating": 7,
+    "occasion": null,
+    "notes": "Liked it. Classic Burgundy-style Pinot Noir from old vines.",
+    "education": "Vieilles Vignes means old vines — older vines produce fewer, more concentrated grapes. Bourgogne AOC is the regional Burgundy classification, a step below village or premier cru wines but from the same region. Burgundy is the spiritual home of Pinot Noir.",
+    "date_logged": "2026-10-10"
+  },
+  {
+    "name": "Craggy Range Te Muna Road Vineyard Pinot Noir",
+    "vintage": "2024",
+    "type": "Red",
+    "grape": "Pinot Noir",
+    "region": "Martinborough, New Zealand",
+    "world": "New World",
+    "producer": "Craggy Range",
+    "rating": 8,
+    "occasion": null,
+    "notes": "Single vineyard Pinot Noir from Martinborough. Very recent vintage (2024).",
+    "education": "Martinborough is New Zealand's most Burgundian wine region — cool climate, free-draining stony soils that stress the vines and produce elegant, structured Pinot Noir. Craggy Range is one of NZ's top producers. Te Muna Road is a single vineyard.",
+    "date_logged": "2026-10-10"
+  },
+  {
+    "name": "Pierre Talayraud L'Original",
+    "vintage": null,
+    "type": "Red",
+    "grape": "Merlot",
+    "region": "Languedoc-Roussillon, France",
+    "world": "Old World",
+    "producer": "Pierre Talayraud",
+    "rating": 8,
+    "occasion": "Japan trip, dinner with Jacqui",
+    "notes": "Ordered from wine bar in Japan. Magnum bottle. Organic certified.",
+    "education": "Pierre Talayraud is a Languedoc-Roussillon producer making organic wines. L'Original is their flagship bottling. Merlot from this region tends to be softer and rounder than Bordeaux Merlot — fits the smooth, low-tannin preference.",
+    "date_logged": "2026-10-10"
+  },
+  {
+    "name": "Gibbston Valley Diamond Pinot Noir",
+    "vintage": "2024",
+    "type": "Red",
+    "grape": "Pinot Noir",
+    "region": "Central Otago, New Zealand",
+    "world": "New World",
+    "producer": "Gibbston Valley",
+    "rating": 8,
+    "occasion": "Queenstown",
+    "notes": "Very nice. Ordered in Queenstown. Smooth and tasty — exactly the style.",
+    "education": "Gibbston Valley is one of Central Otago's pioneering estates. The Diamond label is their Central Otago blend. Gibbston is the coolest and highest altitude of the Central Otago sub-regions, giving the wines nervy elegance and freshness.",
+    "date_logged": "2026-10-21"
+  },
+  {
+    "name": "Mt. Difficulty Bannockburn Pinot Noir",
+    "vintage": "2024",
+    "type": "Red",
+    "grape": "Pinot Noir",
+    "region": "Bannockburn, Central Otago, New Zealand",
+    "world": "New World",
+    "producer": "Mt. Difficulty",
+    "rating": 8,
+    "occasion": "Brisbane, dinner with Jacqui",
+    "notes": "Excellent Central Otago Pinot Noir enjoyed in Brisbane with Jacqui.",
+    "education": "Mt. Difficulty is one of Central Otago's most respected producers, based in Bannockburn — the warmest and driest sub-region of Central Otago. Produces Pinot Noir with a bit more richness while retaining signature elegance.",
+    "date_logged": "2026-10-20"
+  },
+  {
+    "name": "Clearview Cape Kidnappers Merlot",
+    "vintage": "2025",
+    "type": "Red",
+    "grape": "Merlot",
+    "region": "Hawke's Bay, New Zealand",
+    "world": "New World",
+    "producer": "Clearview Estate",
+    "rating": 8,
+    "occasion": "Queenstown",
+    "notes": "Very good and smooth. Ordered by the glass in Queenstown — recommended as top non-Pinot pick and it delivered.",
+    "education": "Cape Kidnappers is a prestigious sub-region at the southern tip of Hawke's Bay. Hawke's Bay Merlot is consistently smoother and rounder than Bordeaux Merlot, well-suited to the light tannin preference.",
+    "date_logged": "2026-10-26"
+  },
+  {
+    "name": "Domaine Saint Antoine Les Copains",
+    "vintage": null,
+    "type": "Red",
+    "grape": "Grenache/Syrah/Mourvèdre blend",
+    "region": "Minervois, Languedoc, France",
+    "world": "Old World",
+    "producer": "Domaine Saint Antoine",
+    "rating": 8,
+    "occasion": "Japan trip",
+    "notes": "Very nice. Organic certified. Southern Languedoc — smooth and well-suited to the profile.",
+    "education": "Minervois is an AOP in the western Languedoc. Les Copains is typically a Grenache-dominant blend with Syrah and Mourvèdre — Grenache keeps it smooth while Syrah adds a little spice. Warm and riper style, plush and fruit-forward.",
+    "date_logged": "2026-11-12"
+  },
+  {
+    "name": "Paxaro Tolo Mencía",
+    "vintage": "2023",
+    "type": "Red",
+    "grape": "Mencía",
+    "region": "Ribeira Sacra, Galicia, Spain",
+    "world": "Old World",
+    "producer": "Paxaro Tolo",
+    "rating": 8,
+    "occasion": "Singapore, dinner out",
+    "notes": "Smooth and very good. Mencía from Ribeira Sacra — aged 16 months. Exactly the right profile.",
+    "education": "Mencía is often compared to Pinot Noir — light body, low tannin, red-fruited and smooth. Ribeira Sacra is a dramatic river valley DO in Galicia where vines grow on steep slate terraces. A reliable alternative when Pinot isn't on the menu.",
+    "date_logged": "2026-11-06"
+  },
+  {
+    "name": "Felton Road Pinot Noir",
+    "vintage": "2022",
+    "type": "Red",
+    "grape": "Pinot Noir",
+    "region": "Central Otago, New Zealand",
+    "world": "New World",
+    "producer": "Felton Road",
+    "rating": 9,
+    "occasion": null,
+    "notes": "Excellent.",
+    "education": "Felton Road is considered one of New Zealand's greatest producers. 2022 was an outstanding vintage in Central Otago. Cold nights preserve acidity and freshness, hot days ripen the fruit — resulting in Pinot Noir with more structure and depth than Martinborough but still silky.",
+    "date_logged": "2026-10-10"
+  }
+];
+
+let activeFilter = 'all';
+let activeSort = 'date_desc';
+
+function getRatingLabel(r) {
+  if (r >= 9) return 'Outstanding';
+  if (r >= 8) return 'Very Good';
+  if (r >= 7) return 'Good';
+  return 'Decent';
+}
+
+function getStars(r) {
+  return '★'.repeat(Math.round(r / 2)) + '☆'.repeat(5 - Math.round(r / 2));
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function renderStats(visible) {
+  document.getElementById('stat-total').textContent = visible.length;
+  const avg = visible.length ? (visible.reduce((s, w) => s + w.rating, 0) / visible.length).toFixed(1) : '0';
+  document.getElementById('stat-avg').textContent = avg;
+  document.getElementById('stat-top').textContent = visible.filter(w => w.rating >= 9).length;
+}
+
+function sortWines(arr) {
+  const copy = [...arr];
+  if (activeSort === 'date_desc') return copy.sort((a, b) => (b.date_logged || '').localeCompare(a.date_logged || ''));
+  if (activeSort === 'rating_desc') return copy.sort((a, b) => b.rating - a.rating);
+  if (activeSort === 'rating_asc') return copy.sort((a, b) => a.rating - b.rating);
+  if (activeSort === 'name_asc') return copy.sort((a, b) => a.name.localeCompare(b.name));
+  return copy;
+}
+
+function filterWines() {
+  if (activeFilter === 'all') return wines;
+  if (activeFilter === 'top') return wines.filter(w => w.rating >= 8);
+  if (activeFilter === 'Old World' || activeFilter === 'New World') return wines.filter(w => w.world === activeFilter);
+  return wines.filter(w => w.grape === activeFilter);
+}
+
+function render() {
+  const filtered = filterWines();
+  const sorted = sortWines(filtered);
+  renderStats(filtered);
+  document.getElementById('subtitle').textContent = `${wines.length} wines logged · Last updated Nov 2026`;
+
+  const list = document.getElementById('wineList');
+  if (sorted.length === 0) {
+    list.innerHTML = '<div class="empty">No wines match this filter.</div>';
+    return;
+  }
+
+  list.innerHTML = sorted.map(w => {
+    const isTop = w.rating >= 9;
+    const vintagePart = w.vintage ? ` ${w.vintage}` : '';
+    return `
+    <div class="wine-card ${isTop ? 'top-pick' : ''}">
+      <div class="card-top">
+        <div class="wine-name">${w.name}${vintagePart}</div>
+        <div class="rating">
+          <div class="score">${w.rating}</div>
+          <div class="stars">${getStars(w.rating)}</div>
+          <div class="label">${getRatingLabel(w.rating)}</div>
+        </div>
+      </div>
+      <div class="meta">
+        <span class="tag">${w.region}</span>
+        <span class="tag grape">${w.grape}</span>
+        <span class="tag world">${w.world}</span>
+      </div>
+      ${w.occasion ? `<div class="occasion">📍 ${w.occasion}</div>` : ''}
+      ${w.notes ? `<div class="notes">${w.notes}</div>` : ''}
+      ${w.education ? `<details><summary>Learn more about this wine</summary><div class="education">${w.education}</div></details>` : ''}
+      <div class="date-logged">Logged ${formatDate(w.date_logged)}</div>
+    </div>`;
+  }).join('');
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+document.getElementById('sortSelect').addEventListener('change', e => {
+  activeSort = e.target.value;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
